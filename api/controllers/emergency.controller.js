@@ -1,7 +1,7 @@
 import EmergencyReport from "../models/emergency.model.js";
 import transporter from "../config/nodemailer.js";
 import User from "../models/user.model.js";
-import cloudinary from 'cloudinary'
+import cloudinary from "cloudinary";
 import { io } from "../index.js";
 
 class EmergencyController {
@@ -9,9 +9,9 @@ class EmergencyController {
     try {
       const { type, address, details, phone, latitude, longitude } = req.body;
       const images = req.files;
-      console.log(type)
-      console.log(address)
-      console.log(images)
+      console.log(type);
+      console.log(address);
+      console.log(images);
       // Upload images to Cloudinary and get their URLs
       let imageUrls = [];
       if (images) {
@@ -29,6 +29,7 @@ class EmergencyController {
           })
         );
       }
+      console.log(imageUrls);
       const newEmergencyReport = new EmergencyReport({
         type: type,
         location: {
@@ -44,7 +45,7 @@ class EmergencyController {
       });
 
       const savedEmergencyReport = await newEmergencyReport.save();
-
+      console.log(savedEmergencyReport);
       const matchingVolunteers = await User.find({
         skills_qualifications: type,
       });

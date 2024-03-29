@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { toast } from "react-toastify";
-import { FiUpload } from "react-icons/fi"; // Import icon from react-icons library
+import { FiUpload } from "react-icons/fi";
+import axios from "axios";
 
 const EmergencyReportForm = () => {
   const [formData, setFormData] = useState({
@@ -10,7 +11,7 @@ const EmergencyReportForm = () => {
     phone: "",
     latitude: null,
     longitude: null,
-    image: null, // New state to hold the selected image file
+    image: null,
   });
 
   const handleInputChange = (e) => {
@@ -23,7 +24,7 @@ const EmergencyReportForm = () => {
   const handleImageChange = (e) => {
     setFormData({
       ...formData,
-      image: e.target.files[0], // Update image state with the selected file
+      image: e.target.files[0],
     });
   };
 
@@ -49,60 +50,52 @@ const EmergencyReportForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const token = localStorage.getItem("token");
-    const headers = {
-      Authorization: `Bearer ${token}`,
-      'Content-Type': 'multipart/form-data',
-      
-    };
 
-    const formDataToSend = {
-      type: formData.type,
-      address: formData.address,
-      details: formData.details,
-      phone: formData.phone,
-      latitude: formData.latitude,
-      longitude: formData.longitude,
-    };
-
-    // Create form data object
-    const formDataWithImage = new FormData();
-    formDataWithImage.append("image", formData.image); // Append the image file
-    formDataWithImage.append("data", JSON.stringify(formDataToSend)); // Append other form data as JSON string
+    const formDataToSend = new FormData();
+    formDataToSend.append("image", formData.image);
+    formDataToSend.append("type", formData.type);
+    formDataToSend.append("address", formData.address);
+    formDataToSend.append("details", formData.details);
+    formDataToSend.append("phone", formData.phone);
+    formDataToSend.append("latitude", formData.latitude);
+    formDataToSend.append("longitude", formData.longitude);
 
     try {
-      const response = await fetch("/api/emergency/report", {
-        method: "POST",
-        headers: {
-          ...headers,
-        },
-        body: formDataWithImage, 
-      });
+      const response = await axios.post(
+        "/api/emergency/report",
+        formDataToSend,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
 
-      if (!response.ok) {
+      if (response.status === 201) {
+        setFormData({
+          type: "",
+          address: "",
+          details: "",
+          phone: "",
+          latitude: null,
+          longitude: null,
+          image: null,
+        });
+
+        toast.success("Emergency Reported Successfully");
+      } else {
         throw new Error("Failed to create emergency report");
       }
-
-      setFormData({
-        type: "",
-        address: "",
-        details: "",
-        phone: "",
-        latitude: null,
-        longitude: null,
-        image: null, // Reset image state after successful submission
-      });
-
-      toast.success("Emergency Reported Successfully");
     } catch (error) {
-      toast.error(error);
+      console.log(error);
+      toast.error(error.message);
     }
   };
 
   return (
     <div className="max-w-lg mx-auto p-8 bg-white shadow-md rounded-md">
       <form onSubmit={handleSubmit}>
-        {/* Existing form elements */}
-
         <div className="mb-4">
           <label
             htmlFor="type"
@@ -196,7 +189,6 @@ const EmergencyReportForm = () => {
             </p>
           )}
         </div>
-        {/* New input for image upload */}
         <div className="mb-4">
           <label
             htmlFor="image"
@@ -215,18 +207,16 @@ const EmergencyReportForm = () => {
               type="file"
               id="image"
               name="image"
-              accept="image/*" // Allow only image files
+              accept="image/*"
               className="hidden"
               onChange={handleImageChange}
             />
             {formData.image && (
               <span className="ml-4">{formData.image.name}</span>
-            )}{" "}
-            {/* Display selected file name */}
+            )}
           </div>
         </div>
 
-        {/* Existing form elements */}
 
         <button
           type="submit"
