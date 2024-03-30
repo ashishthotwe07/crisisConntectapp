@@ -46,6 +46,7 @@ const Notification = () => {
               key={index}
               className="flex items-center justify-between mb-4 border-b pb-4"
             >
+              
               <div>
                 <p className="md:text-sm text-xs">{notification.message}</p>
               </div>

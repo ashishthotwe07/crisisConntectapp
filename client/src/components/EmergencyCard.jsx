@@ -1,11 +1,11 @@
 import React, { useState } from "react";
 import { FaClock, FaMapMarkerAlt } from "react-icons/fa";
 import ChatApp from "./ChatBox";
-import MapComponent from "./MapComponent";
 
 const EmergencyCard = ({ emergency }) => {
   const [isChatOpen, setIsChatOpen] = useState(false);
 
+  console.log(emergency)
   const toggleChat = () => {
     setIsChatOpen(!isChatOpen);
   };
@@ -30,9 +30,10 @@ const EmergencyCard = ({ emergency }) => {
 
   return (
     <div className="max-w-sm bg-white border border-gray-200 rounded-lg shadow-md p-4">
-      <MapComponent
-        latitude={emergency.location.coordinates[1]}
-        longitude={emergency.location.coordinates[0]}
+      <img
+        src={emergency.images && emergency.images.length > 0 ? emergency.images[0].secure_url : ""}
+        alt="Emergency Image"
+        className="h-48 w-full object-cover rounded-t-lg"
       />
       <div className="mt-4">
         <div className="">

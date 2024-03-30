@@ -12,14 +12,11 @@ const MyReports = () => {
   const fetchReports = async () => {
     try {
       // Fetch data from your API endpoint
-      const response = await fetch(
-        "/api/emergency/users/reports",
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`, // Get token from localStorage
-          },
-        }
-      );
+      const response = await fetch("/api/emergency/users/reports", {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`, // Get token from localStorage
+        },
+      });
       if (!response.ok) {
         throw new Error("Failed to fetch reports");
       }
@@ -51,7 +48,7 @@ const ListItem = ({ _id, type, address, status }) => {
     try {
       // Send PUT request to update report status
       const response = await fetch(
-        `http://localhost:3000/api/emergency/reports/${_id}`,
+        `/api/emergency/reports/${_id}`,
         {
           method: "PUT",
           headers: {

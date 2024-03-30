@@ -76,6 +76,46 @@ class ChatController {
       return res.status(500).json({ error: "Internal Server Error" });
     }
   };
+
+  getChats = async (req, res) => {
+    try {
+      // Find all conversations
+      const userId = req.user._id;
+      const conversations = await Conversation.find().populate("users");
+
+      // Array to store users involved in conversations
+      const usersInConversations = [];
+
+      // Iterate through each conversation
+      for (const conversation of conversations) {
+        // Extract user IDs from the conversation
+        const userIds = conversation.users.map((user) => user._id);
+
+        // Find the other user in the conversation
+        const otherUser = conversation.users.find(
+          (user) => user._id.toString() !== userId.toString()
+        );
+
+        // Add the other user to the array if not already included
+        if (
+          !usersInConversations.some(
+            (user) => user._id.toString() === otherUser._id.toString()
+          )
+        ) {
+          usersInConversations.push(otherUser);
+        }
+      }
+
+      // Log the users involved in conversations
+      console.log("Users involved in conversations:", usersInConversations);
+
+      // Send the response with the users involved in conversations
+      return res.status(200).json({ users: usersInConversations });
+    } catch (error) {
+      console.error("Error in getChats controller:", error);
+      return res.status(500).json({ error: "Internal Server Error" });
+    }
+  };
 }
 
 export default new ChatController();

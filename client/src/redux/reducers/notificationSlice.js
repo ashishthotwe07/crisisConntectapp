@@ -43,6 +43,7 @@ socket.on("updatedNotification", (notification) => {
 
 // Listen for new message notifications from the server
 socket.on("newMessageNotification", (notification) => {
+  console.log(notification)
   store.dispatch(notificationSlice.actions.receiveNotification(notification));
 });
 

@@ -14,14 +14,11 @@ const VolunteerNetwork = () => {
     const fetchVolunteers = async () => {
       try {
         const token = localStorage.getItem("token");
-        const response = await axios.get(
-          "/api/volunteer/get",
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
+        const response = await axios.get("/api/volunteer/get", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
 
         setUsers(response.data);
       } catch (error) {
@@ -43,8 +40,12 @@ const VolunteerNetwork = () => {
   const currentUsers = users.slice(startIndex, endIndex);
 
   const toggleChat = (userId) => {
-    setIsChatOpen(!isChatOpen);
-    setSelectedUserId(userId); 
+    setIsChatOpen(!isChatOpen); // Open the chat
+    setSelectedUserId(userId);
+  };
+  const openChat = (userId) => {
+    setIsChatOpen(true); // Open the chat
+    setSelectedUserId(userId); // Set the selected user ID
   };
 
   return (
@@ -92,9 +93,8 @@ const VolunteerNetwork = () => {
                       <p className="whitespace-no-wrap text-lg">{user.email}</p>
                     </td>
                     <td className="border-b border-gray-200 bg-white px-5 py-5 text-sm">
-                    
                       <button
-                        onClick={() => toggleChat(user._id)}
+                        onClick={() => openChat(user._id)}
                         className="relative inline-flex items-center justify-center p-0.5 mb-2 me-2 overflow-hidden text-sm font-medium text-gray-900 rounded-lg group bg-gradient-to-br from-purple-600 to-blue-500 group-hover:from-purple-600 group-hover:to-blue-500 hover:text-white dark:text-white focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800"
                       >
                         <span className="relative px-5 py-2.5 transition-all ease-in duration-75 bg-white dark:bg-gray-900 rounded-md group-hover:bg-opacity-0">

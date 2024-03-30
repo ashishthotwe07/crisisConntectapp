@@ -3,15 +3,14 @@ import transporter from "../config/nodemailer.js";
 import User from "../models/user.model.js";
 import cloudinary from "cloudinary";
 import { io } from "../index.js";
+import Notification from "../models/notification.model.js";
 
 class EmergencyController {
   async createEmergencyReport(req, res) {
     try {
       const { type, address, details, phone, latitude, longitude } = req.body;
       const images = req.files;
-      console.log(type);
-      console.log(address);
-      console.log(images);
+
       // Upload images to Cloudinary and get their URLs
       let imageUrls = [];
       if (images) {
@@ -29,7 +28,7 @@ class EmergencyController {
           })
         );
       }
-      console.log(imageUrls);
+
       const newEmergencyReport = new EmergencyReport({
         type: type,
         location: {
@@ -45,7 +44,18 @@ class EmergencyController {
       });
 
       const savedEmergencyReport = await newEmergencyReport.save();
-      console.log(savedEmergencyReport);
+
+      // Create a notification for the new emergency report
+      const newNotification = new Notification({
+        user: req.user._id,
+        message: `A new emergency report of type "${formatReportType(
+          type
+        )}" has been reported at ${address}.`,
+        relatedEntity: savedEmergencyReport._id, // Store the ID of the related emergency report
+        type: "NewReport",
+      });
+      await newNotification.save();
+
       const matchingVolunteers = await User.find({
         skills_qualifications: type,
       });
@@ -58,18 +68,48 @@ class EmergencyController {
         );
       }
 
-      const notificationMessage = {
-        user: req.user._id,
-        message: `A new emergency report of type "${formatReportType(
-          type
-        )}" has been reported at ${address}.`,
-      };
-
-      io.emit("newEmergencyReport", notificationMessage);
+      io.emit("newEmergencyReport", newNotification); // Emit the new notification
 
       res.status(201).json({ success: true, data: savedEmergencyReport });
     } catch (error) {
       console.error("Error creating emergency report:", error);
+      res.status(500).json({ success: false, error: "Internal Server Error" });
+    }
+  }
+
+  async updateEmergencyReport(req, res) {
+    try {
+      const { id } = req.params;
+      const { status } = req.body;
+      const updatedReport = await EmergencyReport.findByIdAndUpdate(
+        id,
+        { status },
+        { new: true }
+      );
+
+      let notificationMessage = "";
+      if (status === "resolved") {
+        notificationMessage = `The ${updatedReport.type} happened at ${updatedReport.address} has been resolved ".`;
+      } else if (status === "reported") {
+        notificationMessage = `The ${updatedReport.type} happened at ${updatedReport.address} has been reported again `;
+      } else {
+        // Handle other status types here
+      }
+
+      // Create a notification for the updated emergency report
+      const updatedNotification = new Notification({
+        user: req.user._id,
+        message: notificationMessage,
+        relatedEntity: updatedReport._id, // Store the ID of the related emergency report
+        type: "ReportUpdate",
+      });
+      await updatedNotification.save();
+
+      io.emit("updatedNotification", updatedNotification); // Emit the updated notification
+
+      res.status(200).json({ success: true, data: updatedReport });
+    } catch (error) {
+      console.error("Error updating report status:", error);
       res.status(500).json({ success: false, error: "Internal Server Error" });
     }
   }
@@ -124,27 +164,6 @@ class EmergencyController {
       res.status(200).json({ success: true, data: emergencyReport });
     } catch (error) {
       console.error("Error retrieving emergency report by ID:", error);
-      res.status(500).json({ success: false, error: "Internal Server Error" });
-    }
-  }
-
-  async updateEmergencyReport(req, res) {
-    try {
-      const { id } = req.params;
-      const { status } = req.body;
-      const updatedReport = await EmergencyReport.findByIdAndUpdate(
-        id,
-        { status },
-        { new: true }
-      );
-      const notificationMessage = {
-        user: req.user._id,
-        message: `The ${updatedReport.type} emergency has been  ${updatedReport.status}".`,
-      };
-      io.emit("updatedNotification", notificationMessage);
-      res.status(200).json({ success: true, data: updatedReport });
-    } catch (error) {
-      console.error("Error updating report status:", error);
       res.status(500).json({ success: false, error: "Internal Server Error" });
     }
   }

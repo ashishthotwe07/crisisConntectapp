@@ -2,6 +2,7 @@ import React, { Suspense, startTransition } from "react";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { RouterProvider, createBrowserRouter } from "react-router-dom";
+import MessagesComponent from "./components/MessagesComponent";
 
 // Lazy load components
 const SignUp = React.lazy(() => import("./pages/SignUp"));
@@ -125,6 +126,14 @@ export default function App() {
           element: (
             <Suspense fallback={<div>Loading...</div>}>
               <Profile />
+            </Suspense>
+          ),
+        },
+        {
+          path: "messages",
+          element: (
+            <Suspense fallback={<div>Loading...</div>}>
+              <MessagesComponent />
             </Suspense>
           ),
         },

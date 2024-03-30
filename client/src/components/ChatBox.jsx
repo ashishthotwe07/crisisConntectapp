@@ -1,16 +1,26 @@
 import React, { useState, useRef, useEffect } from "react";
 import { IoCloseOutline } from "react-icons/io5";
-import { useDispatch, useSelector } from 'react-redux';
-import { chatSelector, createChat, fetchChats } from "../redux/reducers/chatSlice";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  chatSelector,
+  createChat,
+  fetchChats,
+} from "../redux/reducers/chatSlice";
 import io from "socket.io-client";
+import axios from "axios"; // Import Axios
+import { AuthSelector } from "../redux/reducers/authSlice";
 
-const socket = io('http://localhost:5000');
+const socket = io("http://localhost:5000");
 
 function ChatApp({ toggleChat, user }) {
   const [inputValue, setInputValue] = useState("");
   const messagesEndRef = useRef(null);
+ 
+  
   const dispatch = useDispatch();
   const { messages } = useSelector(chatSelector);
+
+
 
   useEffect(() => {
     dispatch(fetchChats({ user }));
@@ -42,9 +52,8 @@ function ChatApp({ toggleChat, user }) {
     };
   }, [dispatch]);
 
-
   return (
-    <div className="fixed bottom-0 right-0 mb-4 mr-4">
+    <div className="absolute bottom-0 z-20 right-0 mb-4 mr-4">
       <div className="fixed bottom-16 right-4 w-96">
         <div className="bg-white shadow-md rounded-lg max-w-lg w-full">
           <div className="p-4 border-b bg-gray-500 text-white rounded-t-lg flex justify-between items-center">
@@ -63,14 +72,23 @@ function ChatApp({ toggleChat, user }) {
               </div>
             ) : (
               messages.map((message, index) => (
-                <div key={index} className={`mb-2 ${message.sender !== user ? "text-right" : ""}`}>
-                  <p className={`bg-${message.sender === user ? "red" : "gray"}-500 text-white rounded-lg py-2 px-4 inline-block`}>
+                <div
+                  key={index}
+                  className={`mb-2 ${
+                    message.sender !== user ? "text-right" : ""
+                  }`}
+                >
+                  <p
+                    className={`bg-${
+                      message.sender === user ? "red" : "gray"
+                    }-500 text-white rounded-lg py-2 px-4 inline-block`}
+                  >
                     {message.message}
                   </p>
                   <p>{new Date(message.createdAt).toLocaleTimeString()}</p>
                 </div>
               ))
-            )}  
+            )}
             <div ref={messagesEndRef} />
           </div>
           <div className="p-4 border-t flex">

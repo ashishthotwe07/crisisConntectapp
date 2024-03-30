@@ -38,6 +38,81 @@ export default function EmergencyDetails() {
     fetchData();
   }, [id]);
 
+  const renderImages = () => {
+    if (!emergencyData.images || emergencyData.images.length === 0) {
+      return null;
+    }
+
+    if (emergencyData.images.length === 1) {
+      return (
+        <div className="relative w-full">
+          {/* Single image */}
+          <div className="h-56 md:h-96 overflow-hidden rounded-lg">
+            <img
+              src={emergencyData.images[0].secure_url}
+              className="absolute block w-full -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2"
+              alt="Emergency Image"
+            />
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div
+        id="default-carousel"
+        className="relative w-full"
+        data-carousel="slide"
+      >
+        <div className="relative h-56 md:h-96 overflow-hidden rounded-lg">
+          {emergencyData.images.map((image, index) => (
+            <div
+              key={index}
+              className={`hidden ${
+                index === 0 ? "duration-700" : ""
+              } ease-in-out`}
+              data-carousel-item
+            >
+              <img
+                src={image.secure_url}
+                className="absolute block w-full -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2"
+                alt={`Emergency Image ${index + 1}`}
+              />
+            </div>
+          ))}
+        </div>
+        <div className="absolute z-30 flex -translate-x-1/2 bottom-5 left-1/2 space-x-3 rtl:space-x-reverse">
+          {emergencyData.images.map((_, index) => (
+            <button
+              key={index}
+              type="button"
+              className={`w-3 h-3 rounded-full ${
+                index === 0 ? "bg-white" : "bg-gray-500"
+              } ${index === 0 ? "hover:bg-gray-600" : "hover:bg-white"}`}
+              aria-current={index === 0 ? "true" : "false"}
+              aria-label={`Slide ${index + 1}`}
+              data-carousel-slide-to={index}
+            ></button>
+          ))}
+        </div>
+        <button
+          type="button"
+          className="absolute top-0 start-0 z-30 flex items-center justify-center h-full px-4 cursor-pointer group focus:outline-none"
+          data-carousel-prev
+        >
+          {/* Previous button SVG */}
+        </button>
+        <button
+          type="button"
+          className="absolute top-0 end-0 z-30 flex items-center justify-center h-full px-4 cursor-pointer group focus:outline-none"
+          data-carousel-next
+        >
+          {/* Next button SVG */}
+        </button>
+      </div>
+    );
+  };
+
   return (
     <Layout>
       {emergencyData ? (
@@ -52,7 +127,9 @@ export default function EmergencyDetails() {
               </div>
               <div className="lg:col-span-2">
                 <div className="bg-gray-100 p-6 rounded-lg">
-                  <h3 className="text-lg font-semibold text-gray-800">Details</h3>
+                  <h3 className="text-lg font-semibold text-gray-800">
+                    Details
+                  </h3>
                   <ul className="mt-4 text-gray-600">
                     <li>
                       <h2 className="mt-6 text-2xl font-extrabold text-gray-800">
@@ -76,31 +153,9 @@ export default function EmergencyDetails() {
                         {formatDate(emergencyData.updatedAt)}
                       </span>
                     </li>
-                    {/* Display image if available */}
-                    {emergencyData.images && emergencyData.images.length > 0 && (
-                      <li>
-                        <h2 className="mt-6 text-2xl font-extrabold text-gray-800">
-                          Image:
-                        </h2>
-                        {emergencyData.images.map((image, index) => (
-                          <img
-                            key={index}
-                            src={image.secure_url}
-                            alt={`Emergency Image ${index + 1}`}
-                            className="mt-2 max-w-full"
-                          />
-                        ))}
-                      </li>
-                    )}
+                    {/* Display images */}
+                    {renderImages()}
                   </ul>
-                  <div className="flex justify-center mt-6">
-                    <button
-                      type="button"
-                      className="px-4 py-2 bg-gray-800 text-white font-semibold rounded hover:bg-gray-700"
-                    >
-                      Message Reporter
-                    </button>
-                  </div>
                 </div>
               </div>
             </div>
