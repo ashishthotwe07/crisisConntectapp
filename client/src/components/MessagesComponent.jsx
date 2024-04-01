@@ -1,32 +1,35 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import ChatApp from "./ChatBox";
+import { useSelector } from "react-redux";
+import { NotificationSelector } from "../redux/reducers/notificationSlice";
 
 function MessagesComponent() {
   const [messages, setMessages] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [userid, setuserId] = useState(null);
-
+  const [userid, setUserId] = useState(null);
   const [isChatOpen, setIsChatOpen] = useState(false);
 
+  const { notifications } = useSelector(NotificationSelector);
+
   const toggleChat = (id) => {
-    setuserId(id);
+    setUserId(id);
     setIsChatOpen(!isChatOpen);
   };
 
   const openChat = (id) => {
-    setuserId(id);
+    setUserId(id);
     setIsChatOpen(true);
   };
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const token = localStorage.getItem("token"); // Assuming you're storing the token in localStorage
+        const token = localStorage.getItem("token");
         const config = {
           headers: { Authorization: `Bearer ${token}` },
         };
-        const response = await axios.get("/api/chats/", config); // Adjust the URL as per your backend route
+        const response = await axios.get("/api/chats/", config);
         setMessages(response.data.users);
         setLoading(false);
       } catch (error) {
@@ -37,7 +40,6 @@ function MessagesComponent() {
     fetchData();
   }, []);
 
-  console.log(messages);
   return (
     <div className="py-10 h-screen bg-gray-300 px-2">
       <div className="max-w-md mx-auto bg-gray-100 shadow-lg rounded-lg overflow-hidden md:max-w-lg">
@@ -58,7 +60,7 @@ function MessagesComponent() {
                 messages.map((message, index) => (
                   <li
                     key={index}
-                    onClick={() => openChat(message._id)} // Fix onClick event
+                    onClick={() => openChat(message._id)}
                     className="flex justify-between items-center bg-white mt-2 p-2 hover:shadow-lg rounded cursor-pointer transition"
                   >
                     <div className="flex ml-2">

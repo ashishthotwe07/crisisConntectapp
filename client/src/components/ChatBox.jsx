@@ -7,10 +7,10 @@ import {
   fetchChats,
 } from "../redux/reducers/chatSlice";
 import io from "socket.io-client";
-import axios from "axios"; // Import Axios
-import { AuthSelector } from "../redux/reducers/authSlice";
+
 
 const socket = io("http://localhost:5000");
+
 
 function ChatApp({ toggleChat, user }) {
   const [inputValue, setInputValue] = useState("");
@@ -18,7 +18,6 @@ function ChatApp({ toggleChat, user }) {
 
   const dispatch = useDispatch();
   const { messages } = useSelector(chatSelector);
-
   useEffect(() => {
     dispatch(fetchChats({ user }));
   }, [messages]);

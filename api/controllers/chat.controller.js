@@ -10,6 +10,9 @@ class ChatController {
       const { id: recipientId } = req.params;
       const senderId = req.user._id;
 
+      // Fetch sender's details to get the username
+      const sender = await User.findById(senderId);
+
       // Create a new chat message with sender and recipient IDs
       const newMessage = new Message({
         sender: senderId,
@@ -42,9 +45,11 @@ class ChatController {
       // Create and emit a new message notification to the recipient's socket room
       const notificationMessage = {
         user: req.user._id,
-        message: `New message from ${senderId}`,
+        type: "message",
+        message: `New message from ${sender.username}`, // Include sender's username in the notification
       };
-      io.to(recipientId).emit("newMessageNotification", notificationMessage);
+
+      io.emit("newMessageNotification", notificationMessage);
 
       return res.status(201).json({ message: newMessage });
     } catch (error) {
@@ -105,9 +110,6 @@ class ChatController {
           usersInConversations.push(otherUser);
         }
       }
-
-      // Log the users involved in conversations
-      console.log("Users involved in conversations:", usersInConversations);
 
       // Send the response with the users involved in conversations
       return res.status(200).json({ users: usersInConversations });
