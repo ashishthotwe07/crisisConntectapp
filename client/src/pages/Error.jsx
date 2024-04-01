@@ -1,7 +1,7 @@
 import React from "react";
 
 const Error = () => {
-  console.log("error page");
+ 
   return (
     <>
       <section class="bg-white dark:bg-gray-900">

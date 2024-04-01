@@ -90,7 +90,7 @@ class EmergencyController {
       let notificationMessage = "";
       if (status === "resolved") {
         notificationMessage = `The ${updatedReport.type} happened at ${updatedReport.address} has been resolved ".`;
-      } else if (status === "reported") {
+      } else if (status !== "resolved") {
         notificationMessage = `The ${updatedReport.type} happened at ${updatedReport.address} has been reported again `;
       } else {
         // Handle other status types here
@@ -116,20 +116,9 @@ class EmergencyController {
 
   async getAllEmergencyReports(req, res) {
     try {
-      const page = parseInt(req.query.page) || 1;
-      const limit = parseInt(req.query.limit) || 10;
+      const reports = await EmergencyReport.find();
 
-      const startIndex = (page - 1) * limit;
-      const endIndex = page * limit;
-
-      const totalDocuments = await EmergencyReport.countDocuments();
-      const totalPages = Math.ceil(totalDocuments / limit);
-
-      const reports = await EmergencyReport.find()
-        .limit(limit)
-        .skip(startIndex);
-
-      res.status(200).json({ success: true, data: reports, totalPages });
+      res.status(200).json({ success: true, data: reports });
     } catch (error) {
       console.error("Error retrieving all emergency reports:", error);
       res.status(500).json({ success: false, error: "Internal Server Error" });
@@ -170,7 +159,14 @@ class EmergencyController {
 
   async deleteEmergencyReport(req, res) {
     try {
-      // Implement delete emergency report logic here
+      const { id } = req.params;
+      const deletedReport = await EmergencyReport.findByIdAndDelete(id);
+      if (!deletedReport) {
+        return res
+          .status(404)
+          .json({ success: false, error: "Report not found" });
+      }
+      res.status(200).json({ success: true, data: deletedReport });
     } catch (error) {
       console.error("Error deleting emergency report:", error);
       res.status(500).json({ success: false, error: "Internal Server Error" });

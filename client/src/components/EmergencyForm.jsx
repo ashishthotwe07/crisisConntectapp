@@ -13,6 +13,7 @@ const EmergencyReportForm = () => {
     longitude: null,
     image: null,
   });
+  const [submitting, setSubmitting] = useState(false);
 
   const handleInputChange = (e) => {
     setFormData({
@@ -61,6 +62,8 @@ const EmergencyReportForm = () => {
     formDataToSend.append("longitude", formData.longitude);
 
     try {
+      setSubmitting(true); // Set submitting to true when form is submitted
+
       const response = await axios.post(
         "/api/emergency/report",
         formDataToSend,
@@ -90,6 +93,8 @@ const EmergencyReportForm = () => {
     } catch (error) {
       console.log(error);
       toast.error(error.message);
+    } finally {
+      setSubmitting(false); // Set submitting to false after form submission
     }
   };
 
@@ -217,12 +222,11 @@ const EmergencyReportForm = () => {
           </div>
         </div>
 
-
         <button
           type="submit"
           className="w-full py-2 px-4 bg-indigo-600 text-white font-semibold rounded-md hover:bg-indigo-700 focus:outline-none focus:bg-indigo-700"
         >
-          Submit
+          {submitting ? "Submitting..." : "Submit"}
         </button>
       </form>
     </div>

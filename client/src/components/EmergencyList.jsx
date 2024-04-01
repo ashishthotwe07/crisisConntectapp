@@ -9,10 +9,15 @@ const EmergencyList = () => {
   const [emergencyReports, setEmergencyReports] = useState([]);
   const { user } = useSelector(AuthSelector);
   const socket = io("http://localhost:5000");
-  console.log(emergencyReports);
 
   useEffect(() => {
     fetchEmergencyReports();
+
+    // Cleanup function to unsubscribe from socket events
+    return () => {
+      socket.off("newEmergencyReport");
+      socket.off("updatedNotification");
+    };
   }, []);
 
   const fetchEmergencyReports = async () => {
@@ -32,7 +37,7 @@ const EmergencyList = () => {
       }
 
       const data = await response.json();
-     
+
       let filteredReports = data.data;
 
       if (user) {
@@ -47,12 +52,12 @@ const EmergencyList = () => {
     }
   };
 
-  const filteredReports = emergencyReports.filter(
-    (report) => report.status !== "resolved"
-  );
-
   const resolvedReports = emergencyReports.filter(
     (report) => report.status === "resolved"
+  );
+
+  const filteredReports = emergencyReports.filter(
+    (report) => report.status !== "resolved"
   );
 
   filteredReports.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
@@ -64,6 +69,7 @@ const EmergencyList = () => {
   socket.on("updatedNotification", (notification) => {
     fetchEmergencyReports();
   });
+
   return (
     <div className="w-2/3 m-auto">
       {filteredReports.length > 0 && (

@@ -2,12 +2,15 @@ import React, { useEffect, useState } from "react";
 import Layout from "../components/Layout";
 import axios from "axios";
 import ChatApp from "../components/ChatBox";
+import { useSelector } from "react-redux";
+import { AuthSelector } from "../redux/reducers/authSlice";
 
 const VolunteerNetwork = () => {
+  const { user } = useSelector(AuthSelector);
   const [users, setUsers] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [isChatOpen, setIsChatOpen] = useState(false);
-  const [selectedUserId, setSelectedUserId] = useState(null); // State to store the selected user ID
+  const [selectedUserId, setSelectedUserId] = useState(null);
   const itemsPerPage = 5;
 
   useEffect(() => {
@@ -60,81 +63,63 @@ const VolunteerNetwork = () => {
                 <tr className="bg-blue-600 text-left text-xs font-semibold uppercase tracking-widest text-white">
                   <th className="px-5 py-3">Volunteer Name</th>
                   <th className="px-5 py-3">From</th>
-                  <th className="px-5 py-3">Created at</th>
+                  <th className="px-5 py-3">Email</th>
                   <th className="px-5 py-3"></th>
                 </tr>
               </thead>
               {/* Table body */}
               <tbody className="text-gray-500">
-                {currentUsers.map((user, index) => (
-                  <tr key={index}>
-                    <td className="border-b border-gray-200 bg-white px-5 py-5 text-sm">
-                      <div className="flex items-center">
-                        <div className="h-10 w-10 flex-shrink-0">
-                          <img
-                            className="h-full w-full rounded-full"
-                            src="https://media.istockphoto.com/id/1337144146/vector/default-avatar-profile-icon-vector.jpg?s=612x612&w=0&k=20&c=BIbFwuv7FxTWvh5S3vB6bkT0Qv8Vn8N5Ffseq84ClGI="
-                            alt={user.fullName}
-                          />
-                        </div>
-                        <div className="ml-3">
-                          <p className="whitespace-no-wrap text-lg">
-                            {user.username}
-                          </p>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="border-b border-gray-200 bg-white px-5 py-5 text-sm">
-                      <p className="whitespace-no-wrap text-lg">
-                        {user.address}
-                      </p>
-                    </td>
-                    <td className="border-b border-gray-200 bg-white px-5 py-5 text-sm">
-                      <p className="whitespace-no-wrap text-lg">{user.email}</p>
-                    </td>
-                    <td className="border-b border-gray-200 bg-white px-5 py-5 text-sm">
-                      <button
-                        onClick={() => openChat(user._id)}
-                        className="relative inline-flex items-center justify-center p-0.5 mb-2 me-2 overflow-hidden text-sm font-medium text-gray-900 rounded-lg group bg-gradient-to-br from-purple-600 to-blue-500 group-hover:from-purple-600 group-hover:to-blue-500 hover:text-white dark:text-white focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800"
-                      >
-                        <span className="relative px-5 py-2.5 transition-all ease-in duration-75 bg-white dark:bg-gray-900 rounded-md group-hover:bg-opacity-0">
-                          Message
-                        </span>
-                      </button>
-                    </td>
-                  </tr>
-                ))}
+                {currentUsers.length > 1 ? (
+                  <>
+                    {" "}
+                    {currentUsers
+                      .filter((users) => users._id !== user._id)
+                      .map((users, index) => (
+                        <tr key={index}>
+                          <td className="border-b border-gray-200 bg-white px-5 py-5 text-sm">
+                            <div className="flex items-center">
+                              <div className="h-10 w-10 flex-shrink-0">
+                                <img
+                                  className="h-full w-full rounded-full"
+                                  src="https://media.istockphoto.com/id/1337144146/vector/default-avatar-profile-icon-vector.jpg?s=612x612&w=0&k=20&c=BIbFwuv7FxTWvh5S3vB6bkT0Qv8Vn8N5Ffseq84ClGI="
+                                  alt={users.fullName}
+                                />
+                              </div>
+                              <div className="ml-3">
+                                <p className="whitespace-no-wrap text-lg">
+                                  {users.username}
+                                </p>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="border-b border-gray-200 bg-white px-5 py-5 text-sm">
+                            <p className="whitespace-no-wrap text-lg">
+                              {users.address}
+                            </p>
+                          </td>
+                          <td className="border-b border-gray-200 bg-white px-5 py-5 text-sm">
+                            <p className="whitespace-no-wrap text-lg">
+                              {users.email}
+                            </p>
+                          </td>
+                          <td className="border-b border-gray-200 bg-white px-5 py-5 text-sm">
+                            <button
+                              onClick={() => openChat(users._id)}
+                              className="relative inline-flex items-center justify-center p-0.5 mb-2 me-2 overflow-hidden text-sm font-medium text-gray-900 rounded-lg group bg-gradient-to-br from-purple-600 to-blue-500 group-hover:from-purple-600 group-hover:to-blue-500 hover:text-white dark:text-white focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800"
+                            >
+                              <span className="relative px-5 py-2.5 transition-all ease-in duration-75 bg-white dark:bg-gray-900 rounded-md group-hover:bg-opacity-0">
+                                Message
+                              </span>
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                  </>
+                ) : (
+                  "No Volunteers Present"
+                )}
               </tbody>
             </table>
-          </div>
-          {/* Pagination */}
-          <div className="flex flex-col items-center border-t bg-white px-5 py-5 sm:flex-row sm:justify-between">
-            <span className="text-xs text-gray-600 sm:text-sm">
-              Showing {startIndex + 1} to {Math.min(endIndex, users.length)} of{" "}
-              {users.length} Entries
-            </span>
-            <div className="mt-2 inline-flex sm:mt-0">
-              <button
-                className={`mr-2 h-12 w-12 rounded-full border text-sm font-semibold text-gray-600 transition duration-150 hover:bg-gray-100 ${
-                  currentPage === 1 ? "pointer-events-none opacity-50" : ""
-                }`}
-                onClick={() => handleChangePage(currentPage - 1)}
-                disabled={currentPage === 1}
-              >
-                Prev
-              </button>
-              <button
-                className={`h-12 w-12 rounded-full border text-sm font-semibold text-gray-600 transition duration-150 hover:bg-gray-100 ${
-                  currentPage === totalPages
-                    ? "pointer-events-none opacity-50"
-                    : ""
-                }`}
-                onClick={() => handleChangePage(currentPage + 1)}
-                disabled={currentPage === totalPages}
-              >
-                Next
-              </button>
-            </div>
           </div>
         </div>
       </div>

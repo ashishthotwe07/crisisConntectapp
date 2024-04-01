@@ -5,7 +5,6 @@ import ChatApp from "./ChatBox";
 const EmergencyCard = ({ emergency }) => {
   const [isChatOpen, setIsChatOpen] = useState(false);
 
-  console.log(emergency)
   const toggleChat = () => {
     setIsChatOpen(!isChatOpen);
   };
@@ -31,7 +30,11 @@ const EmergencyCard = ({ emergency }) => {
   return (
     <div className="max-w-sm bg-white border border-gray-200 rounded-lg shadow-md p-4">
       <img
-        src={emergency.images && emergency.images.length > 0 ? emergency.images[0].secure_url : ""}
+        src={
+          emergency.images && emergency.images.length > 0
+            ? emergency.images[0].secure_url
+            : ""
+        }
         alt="Emergency Image"
         className="h-48 w-full object-cover rounded-t-lg"
       />
@@ -40,16 +43,21 @@ const EmergencyCard = ({ emergency }) => {
           <h5 className="text-lg font-semibold text-gray-900">
             {emergency.type}
           </h5>
-          <p className="text-sm font-semibold mt-5 text-gray-700">
+          {/* Display 2-3 lines of details */}
+          <p className="text-sm line-clamp-2 font-semibold mt-2 text-gray-700">
             {emergency.details}
           </p>
         </div>
-        <div className="flex justify-between mt-5">
-          <p className="mt-1 text-sm text-gray-700 font-semibold w-40">
-            <FaMapMarkerAlt className="inline " /> {emergency.address}
-          </p>
-          <p className="mt-2 text-sm text-gray-700">
-            <FaClock className="inline mr-2" />
+        <div className="flex flex-col justify-between mt-2">
+          {/* Adjust the layout of the address to ensure fixed space */}
+          <div className="flex items-center">
+            <FaMapMarkerAlt className="text-gray-500" />
+            <p className="text-sm text-gray-700 font-semibold ml-1 truncate w-60">
+              {emergency.address}
+            </p>
+          </div>
+          <p className="text-sm mt-2 text-gray-700">
+            <FaClock className="inline mr-1" />
             {formatDate(emergency.updatedAt)}
           </p>
         </div>

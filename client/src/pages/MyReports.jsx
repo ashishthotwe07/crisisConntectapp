@@ -4,6 +4,7 @@ import { io } from "socket.io-client";
 const MyReports = () => {
   const socket = io("http://localhost:5000");
   const [reports, setReports] = useState([]);
+  const [loading, setLoading] = useState(true); // Loading state
 
   useEffect(() => {
     fetchReports();
@@ -11,6 +12,9 @@ const MyReports = () => {
 
   const fetchReports = async () => {
     try {
+      // Set loading to true when fetching data
+      setLoading(true);
+
       // Fetch data from your API endpoint
       const response = await fetch("/api/emergency/users/reports", {
         headers: {
@@ -25,6 +29,9 @@ const MyReports = () => {
       setReports(data.data);
     } catch (error) {
       console.error("Error fetching reports:", error);
+    } finally {
+      // Set loading to false when data fetching is done
+      setLoading(false);
     }
   };
 
@@ -34,32 +41,34 @@ const MyReports = () => {
 
   return (
     <div className="container mx-auto mt-8">
-      <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {reports.map((report, index) => (
-          <ListItem key={index} {...report} />
-        ))}
-      </ul>
+      {loading ? ( // Show loading indicator if loading is true
+        <div>Loading...</div>
+      ) : (
+        <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {reports.map((report, index) => (
+            <ListItem key={index} {...report} />
+          ))}
+        </ul>
+      )}
     </div>
   );
 };
 
-const ListItem = ({ _id, type, address, status }) => {
-  const handleResolveClick = async () => {
+const ListItem = ({ _id, type, address, status, images }) => {
+  const handleResolveClick = async (e) => {
+    e.preventDefault();
     try {
       // Send PUT request to update report status
-      const response = await fetch(
-        `/api/emergency/reports/${_id}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-          body: JSON.stringify({
-            status: status === "resolved" ? "Reported" : "resolved",
-          }),
-        }
-      );
+      const response = await fetch(`/api/emergency/reports/${_id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+        body: JSON.stringify({
+          status: status === "resolved" ? "Reported" : "resolved",
+        }),
+      });
 
       if (!response.ok) {
         throw new Error("Failed to update report status");
@@ -68,23 +77,51 @@ const ListItem = ({ _id, type, address, status }) => {
       console.error("Error updating report status:", error);
     }
   };
+  const handleDeleteClick = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await fetch(`/api/emergency/reports/${_id}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to delete report");
+      }
+    } catch (error) {
+      console.error("Error deleting report:", error);
+    }
+  };
 
   return (
     <li className="border border-gray-200 rounded-md shadow-md">
-      <div className="p-4">
-        <h3 className="text-lg font-bold text-gray-900">{type}</h3>
-        <p className="mt-2 text-sm text-gray-600">{address}</p>
-        <button
-          onClick={handleResolveClick}
-          className={`block mt-4 text-sm font-medium ${
-            status === "resolved"
-              ? "text-red-600 hover:text-red-500"
-              : "text-green-600 hover:text-green-500"
-          }`}
-        >
-          {status === "resolved" ? "Mark As Unresolved" : "Mark As Resolved"}
-        </button>
-      </div>
+      <a href={`/emergency/details/${_id}`}>
+        <div className="p-4">
+          <div className="flex justify-between">
+            <h3 className="text-lg font-bold text-gray-900">{type}</h3>
+            <button
+              onClick={handleDeleteClick}
+              className="text-white bg-red-600 hover:bg-red-700 px-2 py-1/2 rounded-md"
+            >
+              Delete
+            </button>
+          </div>
+          <p className="mt-2 text-sm text-gray-600 w-72 mb-10">{address}</p>
+          <img src={images[0].secure_url} alt="rimage" className="h-60 " />
+          <button
+            onClick={handleResolveClick}
+            className={`${
+              status === "resolved"
+                ? "text-white bg-gradient-to-r from-red-400 via-red-500 to-red-600 hover:bg-gradient-to-br   shadow-lg shadow-red-500/50  font-medium rounded-lg text-sm px-5 mt-4 py-2.5 text-center me-2 mb-2"
+                : "text-white bg-gradient-to-r from-green-400 via-green-500 to-green-600 hover:bg-gradient-to-br shadow-lg shadow-green-500/50 font-medium rounded-lg text-sm mt-4 px-5 py-2.5 text-center me-2 mb-2"
+            }`}
+          >
+            {status === "resolved" ? "Mark As Unresolved" : "Mark As Resolved"}
+          </button>
+        </div>
+      </a>
     </li>
   );
 };

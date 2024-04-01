@@ -10,11 +10,8 @@ import { AuthSelector } from "../redux/reducers/authSlice";
 
 const Notification = () => {
   const { notifications } = useSelector(NotificationSelector);
-  console.log(notifications);
   const { user } = useSelector(AuthSelector);
 
-  const { message } = notifications;
- 
   const dispatch = useDispatch();
 
   const handleClearAll = () => {
@@ -28,11 +25,13 @@ const Notification = () => {
 
   // Filter out notifications that match the user's ID
   const filteredNotifications = notifications.filter(
- 
     (notification) => notification.user !== user._id
   );
 
-  
+  const handleViewDetail = (reportId) => {
+    window.location.href = `/emergency/details/${reportId}`;
+  };
+
   return (
     <Layout>
       <div className="md:w-1/2 mx-auto p-8 bg-white shadow-md rounded-md">
@@ -46,15 +45,18 @@ const Notification = () => {
               key={index}
               className="flex items-center justify-between mb-4 border-b pb-4"
             >
-              
               <div>
                 <p className="md:text-sm text-xs">{notification.message}</p>
               </div>
-
               <div>
-                <button className="text-indigo-600 text-xs  hover:text-indigo-800 focus:outline-none">
-                  View Detail
-                </button>
+                {notification.type === "newReport" && (
+                  <button
+                    onClick={() => handleViewDetail(notification.report)}
+                    className="text-indigo-600 text-xs  hover:text-indigo-800 focus:outline-none"
+                  >
+                    View Detail
+                  </button>
+                )}
               </div>
             </div>
           ))}

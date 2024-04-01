@@ -102,18 +102,6 @@ const Profile = () => {
                 />
               </div>
 
-              <div className="pb-6">
-                <input
-                  disabled={!isEditing}
-                  name="bio"
-                  className="border-2 rounded-r px-4 py-2 w-full"
-                  type="text"
-                  placeholder="Bio"
-                  value={user.bio}
-                  onChange={handleInputChange}
-                />
-              </div>
-
               {isEditing && (
                 <button
                   type="submit"

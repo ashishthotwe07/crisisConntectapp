@@ -15,12 +15,9 @@ const socket = io("http://localhost:5000");
 function ChatApp({ toggleChat, user }) {
   const [inputValue, setInputValue] = useState("");
   const messagesEndRef = useRef(null);
- 
-  
+
   const dispatch = useDispatch();
   const { messages } = useSelector(chatSelector);
-
-
 
   useEffect(() => {
     dispatch(fetchChats({ user }));
@@ -53,7 +50,7 @@ function ChatApp({ toggleChat, user }) {
   }, [dispatch]);
 
   return (
-    <div className="absolute bottom-0 z-20 right-0 mb-4 mr-4">
+    <div className="absolute bottom-0 z-20 w-96  right-0 mb-4 -mr-10 sm:mr-4">
       <div className="fixed bottom-16 right-4 w-96">
         <div className="bg-white shadow-md rounded-lg max-w-lg w-full">
           <div className="p-4 border-b bg-gray-500 text-white rounded-t-lg flex justify-between items-center">

@@ -3,9 +3,11 @@ import { useParams } from "react-router-dom";
 import axios from "axios";
 import Layout from "../components/Layout";
 import MapComponent from "../components/MapComponent";
+import ChatApp from "../components/ChatBox";
 
 export default function EmergencyDetails() {
   const { id } = useParams();
+  const [isChatOpen, setIsChatOpen] = useState(false);
   const [emergencyData, setEmergencyData] = useState(null);
 
   const formatDate = (timestamp) => {
@@ -25,6 +27,9 @@ export default function EmergencyDetails() {
       return `${daysAgo} day${daysAgo !== 1 ? "s" : ""} ago`;
     }
   };
+  const toggleChat = () => {
+    setIsChatOpen(!isChatOpen);
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -38,131 +43,68 @@ export default function EmergencyDetails() {
     fetchData();
   }, [id]);
 
-  const renderImages = () => {
-    if (!emergencyData.images || emergencyData.images.length === 0) {
-      return null;
-    }
-
-    if (emergencyData.images.length === 1) {
-      return (
-        <div className="relative w-full">
-          {/* Single image */}
-          <div className="h-56 md:h-96 overflow-hidden rounded-lg">
-            <img
-              src={emergencyData.images[0].secure_url}
-              className="absolute block w-full -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2"
-              alt="Emergency Image"
-            />
-          </div>
-        </div>
-      );
-    }
-
-    return (
-      <div
-        id="default-carousel"
-        className="relative w-full"
-        data-carousel="slide"
-      >
-        <div className="relative h-56 md:h-96 overflow-hidden rounded-lg">
-          {emergencyData.images.map((image, index) => (
-            <div
-              key={index}
-              className={`hidden ${
-                index === 0 ? "duration-700" : ""
-              } ease-in-out`}
-              data-carousel-item
-            >
-              <img
-                src={image.secure_url}
-                className="absolute block w-full -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2"
-                alt={`Emergency Image ${index + 1}`}
-              />
-            </div>
-          ))}
-        </div>
-        <div className="absolute z-30 flex -translate-x-1/2 bottom-5 left-1/2 space-x-3 rtl:space-x-reverse">
-          {emergencyData.images.map((_, index) => (
-            <button
-              key={index}
-              type="button"
-              className={`w-3 h-3 rounded-full ${
-                index === 0 ? "bg-white" : "bg-gray-500"
-              } ${index === 0 ? "hover:bg-gray-600" : "hover:bg-white"}`}
-              aria-current={index === 0 ? "true" : "false"}
-              aria-label={`Slide ${index + 1}`}
-              data-carousel-slide-to={index}
-            ></button>
-          ))}
-        </div>
-        <button
-          type="button"
-          className="absolute top-0 start-0 z-30 flex items-center justify-center h-full px-4 cursor-pointer group focus:outline-none"
-          data-carousel-prev
-        >
-          {/* Previous button SVG */}
-        </button>
-        <button
-          type="button"
-          className="absolute top-0 end-0 z-30 flex items-center justify-center h-full px-4 cursor-pointer group focus:outline-none"
-          data-carousel-next
-        >
-          {/* Next button SVG */}
-        </button>
-      </div>
-    );
-  };
-
   return (
     <Layout>
       {emergencyData ? (
-        <div className="m-auto md:w-2/3 font-[sans-serif]">
-          <div className="p-6 lg:max-w-7xl max-w-2xl max-lg:mx-auto">
-            <div className="grid items-start grid-cols-1 lg:grid-cols-5 gap-12">
-              <div className="lg:col-span-3 bg-gray-100 w-full lg:sticky top-0 text-center p-8">
-                <MapComponent
-                  latitude={emergencyData.location.coordinates[1]}
-                  longitude={emergencyData.location.coordinates[0]}
-                />
+        <div className="container mx-auto p-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div className="bg-gray-100 p-6 rounded-lg">
+              <MapComponent
+                latitude={emergencyData.location.coordinates[1]}
+                longitude={emergencyData.location.coordinates[0]}
+              />
+            </div>
+            <div className="bg-gray-100 p-6 rounded-lg">
+              <h2 className="text-2xl font-bold text-gray-800 mb-4">
+                {emergencyData.type}
+              </h2>
+              <p className="text-gray-600 mb-4">{emergencyData.details}</p>
+              <div className="mb-4">
+                <span className="font-bold">Location:</span>{" "}
+                {emergencyData.address}
               </div>
-              <div className="lg:col-span-2">
-                <div className="bg-gray-100 p-6 rounded-lg">
-                  <h3 className="text-lg font-semibold text-gray-800">
-                    Details
-                  </h3>
-                  <ul className="mt-4 text-gray-600">
-                    <li>
-                      <h2 className="mt-6 text-2xl font-extrabold text-gray-800">
-                        <span className="mt-2">Type:</span> {emergencyData.type}
-                      </h2>
-                      <p className="mt-2 mb-2 text-gray-600">
-                        {emergencyData.details}
-                      </p>
-                    </li>
-                    <li>
-                      <span className="font-bold">Location:</span>{" "}
-                      {emergencyData.address}
-                    </li>
-                    <li>
-                      <span className="font-bold">Status:</span>{" "}
-                      <span>{emergencyData.status}</span>
-                    </li>
-                    <li>
-                      <span className="font-bold">UpdatedAt:</span>{" "}
-                      <span className="text-yellow-500">
-                        {formatDate(emergencyData.updatedAt)}
-                      </span>
-                    </li>
-                    {/* Display images */}
-                    {renderImages()}
-                  </ul>
-                </div>
+              <div className="mb-4">
+                <span className="font-bold">Reported:</span>{" "}
+                <span className="text-yellow-500">
+                  {formatDate(emergencyData.updatedAt)}
+                </span>
+              </div>
+              <div className="flex gap-10">
+                <a
+                  href={`https://www.google.com/maps/search/?api=1&query=${emergencyData.location.coordinates[1]},${emergencyData.location.coordinates[0]}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-4 bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 px-4 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  {" "}
+                  Open in Google Maps{" "}
+                </a>
+                <button
+                  onClick={toggleChat}
+                  class="relative mt-4 inline-flex items-center justify-center p-0.5 mb-2 me-2 overflow-hidden text-sm font-medium text-gray-900 rounded-lg group bg-gradient-to-br from-cyan-500 to-blue-500 group-hover:from-cyan-500 group-hover:to-blue-500 hover:text-white"
+                >
+                  <span class="relative px-5  py-2.5 transition-all ease-in duration-75 bg-white rounded-md group-hover:bg-opacity-0">
+                    Message Reporter
+                  </span>
+                </button>
               </div>
             </div>
           </div>
+          {emergencyData.images && emergencyData.images.length === 1 && (
+            <div className="mt-8">
+              <img
+                src={emergencyData.images[0].secure_url}
+                alt="Emergency Image"
+                className="w-full rounded-lg"
+              />
+            </div>
+          )}
         </div>
       ) : (
         <div>Loading...</div>
+      )}
+      {isChatOpen && (
+        <ChatApp toggleChat={toggleChat} user={emergencyData.user} />
       )}
     </Layout>
   );
